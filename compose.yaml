@@ -1,0 +1,54 @@
+x-app: &app
+  build: .
+  image: experiment-job-manager:local
+  environment:
+    EJM_API_KEY: ${EJM_API_KEY:?Set EJM_API_KEY}
+    EJM_DATABASE_URL: postgresql+psycopg://experiments:${EJM_DB_PASSWORD:?Set EJM_DB_PASSWORD}@db:5432/experiments
+    EJM_LEASE_SECONDS: "30"
+    EJM_POLL_SECONDS: "0.5"
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: experiments
+      POSTGRES_DB: experiments
+      POSTGRES_PASSWORD: ${EJM_DB_PASSWORD:?Set EJM_DB_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U experiments -d experiments"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  migrate:
+    <<: *app
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *app
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  worker:
+    <<: *app
+    command: ["ejm-worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pg_data:
+
