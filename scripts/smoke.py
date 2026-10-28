@@ -25,6 +25,10 @@ def main():
             return response.status, json.load(response)
 
     assert call("/health")[1] == {"status": "ok"}
+    # A container deployment includes the custom dashboard, alongside the API.
+    with urllib.request.urlopen(base + "/", timeout=10) as response:
+        dashboard = response.read().decode()
+        assert "Experiment Job Manager" in dashboard and 'id="root"' in dashboard
     payload = {"parameters": {"samples": 100_000, "seed": 42}}
     idempotency = f"smoke-{uuid4()}"
     status, job = call("/v1/jobs", payload, idempotency)

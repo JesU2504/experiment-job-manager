@@ -2,12 +2,15 @@
 
 import secrets
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import APIKeyHeader
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -31,7 +34,7 @@ def create_app(settings: Settings | None = None, engine=None) -> FastAPI:
 
     app = FastAPI(
         title="Experiment Job Manager",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan,
         description=(
             "Submit reproducible Monte Carlo experiments to a durable queue. "
@@ -39,6 +42,15 @@ def create_app(settings: Settings | None = None, engine=None) -> FastAPI:
             "Use the Authorize button with your X-API-Key."
         ),
     )
+    if settings.cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=list(settings.cors_origins),
+            allow_credentials=False,
+            allow_methods=["GET", "POST"],
+            allow_headers=["Content-Type", "X-API-Key", "Idempotency-Key"],
+            expose_headers=["Location"],
+        )
     app.state.store = store
     api_key = APIKeyHeader(name="X-API-Key", auto_error=False)
 
@@ -57,10 +69,6 @@ def create_app(settings: Settings | None = None, engine=None) -> FastAPI:
     @app.exception_handler(Conflict)
     async def conflict(_request, exc):
         return JSONResponse(status_code=409, content={"detail": str(exc)})
-
-    @app.get("/", include_in_schema=False)
-    def home():
-        return RedirectResponse("/docs")
 
     @app.get("/health", tags=["Health"])
     def health(response: Response):
@@ -123,5 +131,19 @@ def create_app(settings: Settings | None = None, engine=None) -> FastAPI:
     )
     def retry_job(job_id: UUID):
         return store.retry(str(job_id))
+
+    web_directory = (
+        Path(settings.web_directory)
+        if settings.web_directory
+        else Path(__file__).resolve().parents[2] / "web" / "dist"
+    )
+    if (web_directory / "index.html").is_file():
+        # API routes are registered first; serving the dashboard never weakens auth.
+        app.mount("/", StaticFiles(directory=web_directory, html=True), name="dashboard")
+    else:
+
+        @app.get("/", include_in_schema=False)
+        def home():
+            return RedirectResponse("/docs")
 
     return app

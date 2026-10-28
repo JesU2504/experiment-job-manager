@@ -2,10 +2,20 @@
 
 [![CI](https://github.com/JesU2504/experiment-job-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/JesU2504/experiment-job-manager/actions/workflows/ci.yml)
 
+**[Open the public dashboard](https://experiment-job-manager-jesus.daintyeagle131.chatgpt.site)**
+— try a real calculation in your browser, with no account or setup. Use
+**Connect API** to switch to your own running Python backend.
+
 A Python backend for submitting computational experiments, executing them in a
 separate worker, and retrieving progress and results through a REST API.
 Jobs and transition events persist in SQL. A seeded Monte Carlo estimate of pi
 provides a small reproducible workload that runs without a GPU or external API.
+
+The custom **React and TypeScript dashboard** makes the project explorable without
+using API documentation. It includes an interactive browser demo and can connect
+to the actual Python API. See [dashboard setup and execution modes](web/README.md).
+
+![Public Experiment Job Manager dashboard](docs/dashboard-preview.png)
 
 ## Implemented in the first milestone
 
@@ -17,6 +27,8 @@ provides a small reproducible workload that runs without a GPU or external API.
 - A state-transition event history and paginated, filterable job listings.
 - Integration tests for races, cancellation, recovery, failure, migrations and process boundaries.
 - GitHub Actions jobs for SQLite, PostgreSQL and a Docker Compose HTTP smoke test.
+- A responsive dashboard with job submission, live progress, cancellation, retries,
+  result export, a convergence chart and a state-transition timeline.
 
 ## Architecture
 
@@ -66,7 +78,12 @@ In a second terminal, activate the same virtual environment and set the **same**
 ejm-worker
 ```
 
-Open [the interactive API docs](http://127.0.0.1:8000/docs), click **Authorize**,
+To serve the custom dashboard locally, install Node 24 and pnpm 11.25.0, run
+`pnpm install --frozen-lockfile` and `pnpm build` from `web/`, then restart the API.
+The dashboard appears at [the application root](http://127.0.0.1:8000/).
+Its **Connect API** action accepts the same API URL and your key.
+
+Alternatively, open [the interactive API docs](http://127.0.0.1:8000/docs), click **Authorize**,
 enter your API key, and submit a job with:
 
 ```json
@@ -144,6 +161,6 @@ HTTP server. Delivery is **at least once**. Cancellation is cooperative at batch
 boundaries; it cannot instantly stop a CPU instruction already executing.
 It does not accept uploaded executable code or provide multi-user accounts.
 
-Next milestones are a TypeScript dashboard, per-user ownership, richer experiment
-types, and workload/queue measurements. See [the implementation walkthrough](docs/walkthrough.md)
+The TypeScript dashboard is implemented. Next milestones are per-user ownership,
+richer experiment types, and workload/queue measurements. See [the implementation walkthrough](docs/walkthrough.md)
 to understand and extend the current code.

@@ -8,3 +8,7 @@ __pycache__
 .ruff_cache
 tests
 docs
+**/node_modules
+web/dist
+web/.openai
+web/.sites-runtime
