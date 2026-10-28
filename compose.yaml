@@ -6,6 +6,7 @@ x-app: &app
     EJM_DATABASE_URL: postgresql+psycopg://experiments:${EJM_DB_PASSWORD:?Set EJM_DB_PASSWORD}@db:5432/experiments
     EJM_LEASE_SECONDS: "30"
     EJM_POLL_SECONDS: "0.5"
+    EJM_CORS_ORIGINS: ${EJM_CORS_ORIGINS:-}
 
 services:
   db:

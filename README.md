@@ -17,7 +17,7 @@ to the actual Python API. See [dashboard setup and execution modes](web/README.m
 
 ![Public Experiment Job Manager dashboard](docs/dashboard-preview.png)
 
-## Implemented in the first milestone
+## Implemented features
 
 - FastAPI endpoints with typed validation, API-key authentication and OpenAPI documentation.
 - SQLAlchemy persistence with Alembic migrations, PostgreSQL support and a SQLite local mode.
@@ -34,7 +34,7 @@ to the actual Python API. See [dashboard setup and execution modes](web/README.m
 
 ```mermaid
 flowchart LR
-    Client[Client or OpenAPI UI] -->|REST and API key| API[FastAPI service]
+    Client[React dashboard or API client] -->|REST and API key| API[FastAPI service]
     API --> SQL[(PostgreSQL or SQLite)]
     Worker[Separate Python worker] -->|Claim and renew lease| SQL
     Worker --> Experiment[Seeded Monte Carlo workload]
