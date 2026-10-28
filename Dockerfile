@@ -11,4 +11,3 @@ COPY migrations ./migrations
 USER app
 EXPOSE 8000
 CMD ["uvicorn", "job_manager.api:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
-

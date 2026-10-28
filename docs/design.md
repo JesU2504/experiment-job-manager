@@ -62,4 +62,3 @@ stale-token rejection, lease expiry at its exact boundary, exhausted attempts,
 manual retries, schema migrations and a worker launched as a separate process.
 The CI pipeline repeats the suite on PostgreSQL and runs the container stack
 through a real HTTP submit/retrieve cycle.
-

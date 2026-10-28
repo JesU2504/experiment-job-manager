@@ -31,4 +31,3 @@
 
 This milestone is a working foundation. Review and extend it so the design
 decisions become examples you can explain from experience.
-

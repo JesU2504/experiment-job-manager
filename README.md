@@ -147,4 +147,3 @@ It does not accept uploaded executable code or provide multi-user accounts.
 Next milestones are a TypeScript dashboard, per-user ownership, richer experiment
 types, and workload/queue measurements. See [the implementation walkthrough](docs/walkthrough.md)
 to understand and extend the current code.
-
